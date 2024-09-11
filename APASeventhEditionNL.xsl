@@ -2173,7 +2173,7 @@
       </xsl:when>
 
       <xsl:when test="b:OfficeStyleKey">
-        <xsl:text>APA7</xsl:text>
+        <xsl:text>APA7 NL</xsl:text>
       </xsl:when>
 
        <xsl:when test="b:XslVersion">
