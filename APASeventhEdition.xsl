@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 
 <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:msxsl="urn:schemas-microsoft-com:xslt"	xmlns:b="http://schemas.openxmlformats.org/officeDocument/2006/bibliography" xmlns:t="http://www.microsoft.com/temp">
   <xsl:output method="html" encoding="us-ascii"/>
@@ -426,7 +426,13 @@
         <xsl:with-param name="LCID" select="$LCID"/>
       </xsl:call-template>
     </xsl:variable>
-    <xsl:value-of select="/*/b:Locals/b:Local[@LCID=$_LCID]/b:Strings/b:EditionShortUnCap"/>
+      <!-- SZ APANL 20240110
+        Toevoeging "ed." weglaten bij de vermelding van de druk.
+        <xsl:value-of select="/*/b:Locals/b:Local[@LCID=$_LCID]/b:Strings/b:EditionShortUnCap"/>
+      -->
+  
+      <xsl:value-of select="b:Edition" />
+    
   </xsl:template>
 
   
@@ -448,8 +454,18 @@
         <xsl:with-param name="LCID" select="$LCID"/>
       </xsl:call-template>
     </xsl:variable>
+    
     <!-- Note: removed due to GitHub issue #3 https://github.com/briankavanaugh/APA-7th-Edition/issues/3 <xsl:value-of select="/*/b:Locals/b:Local[@LCID=$_LCID]/b:Strings/b:RetrievedFromCap"/> -->
-    <xsl:text>Retrieved %1, from %2</xsl:text>
+
+    <!-- 
+      SZ APANL 20231130
+      - "from" -> "van"
+      - aanpassing gedaan naar het format "<naam website>. Geraadpleegd op <datum>, van <url>"
+      - FIXME bij referenties zonder raadpleegdatum wordt nu de URL niet meer getoond.
+    -->
+
+    <xsl:value-of select="concat('%2. Geraadpleegd op %1, van ', b:URL)"/>
+
   </xsl:template>
 
   
@@ -460,8 +476,25 @@
         <xsl:with-param name="LCID" select="$LCID"/>
       </xsl:call-template>
     </xsl:variable>
+
     <!-- Note: removed due to GitHub issue #3 https://github.com/briankavanaugh/APA-7th-Edition/issues/3 <xsl:value-of select="/*/b:Locals/b:Local[@LCID=$_LCID]/b:Strings/b:RetrievedCap"/> -->
-    <xsl:text>Retrieved %1.</xsl:text>
+
+    <!-- SZ APANL 20240110 
+      Als er een URL is ingevuld, moet deze getoond worden. 
+      Zo niet, moet alleen de raadpleegdatum getoond worden.
+
+      Als er een DOI is ingevuld wordt dit template niet gebruikt.
+    -->
+    
+    <xsl:choose>
+      <xsl:when test="string-length(b:URL)>0">
+        <xsl:value-of select="concat('Geraadpleegd op %1, van ', b:URL)"/>
+      </xsl:when>
+      <xsl:otherwise>
+        <xsl:text>Geraadpleegd op %1.</xsl:text>
+      </xsl:otherwise>
+    </xsl:choose>
+
   </xsl:template>
 
   
@@ -489,13 +522,18 @@
 
   
   <xsl:template name="templ_str_NoDateShortUnCap" >
+    
+    <!-- SZ APANL 20231130 In plaats van "sd" willen we hier "z.d." zien.
+
     <xsl:param name="LCID" />
     <xsl:variable name="_LCID">
       <xsl:call-template name="localLCID">
         <xsl:with-param name="LCID" select="$LCID"/>
       </xsl:call-template>
     </xsl:variable>
-    <xsl:value-of select="/*/b:Locals/b:Local[@LCID=$_LCID]/b:Strings/b:NoDateShortUnCap"/>
+    <xsl:value-of select="/*/b:Locals/b:Local[@LCID=$_LCID]/b:Strings/b:NoDateShortUnCap"/>-->
+
+    <xsl:text>z.d.</xsl:text>
   </xsl:template>
 
   
@@ -539,7 +577,8 @@
         <xsl:with-param name="LCID" select="$LCID"/>
       </xsl:call-template>
     </xsl:variable>
-    <xsl:value-of select="/*/b:Locals/b:Local[@LCID=$_LCID]/b:Strings/b:PagesCountinousShort"/>
+    <!-- SZ APANL 20240905 Hiermee wordt de pp. voor de paginanummers weggehaald.
+    <xsl:value-of select="/*/b:Locals/b:Local[@LCID=$_LCID]/b:Strings/b:PagesCountinousShort"/>-->
   </xsl:template>
 
   
@@ -1001,7 +1040,8 @@
         <xsl:with-param name="LCID" select="$LCID"/>
       </xsl:call-template>
     </xsl:variable>
-    <xsl:value-of select="/*/b:Locals/b:Local[@LCID=$_LCID]/b:Strings/b:EditorsShortCap"/>
+    <!--<xsl:value-of select="/*/b:Locals/b:Local[@LCID=$_LCID]/b:Strings/b:EditorsShortCap"/>-->
+    <xsl:text>Reds.</xsl:text>
   </xsl:template>
 
   
@@ -2014,15 +2054,36 @@
     <xsl:value-of select="/*/b:Locals/b:Local[@LCID=$_LCID]/b:APA/b:Date/b:DY"/>
   </xsl:template>
 
-  
-  <xsl:template name="templ_prop_APA_DateAccessed_DMY" >
+  <!-- SZ APANL 20231130 template om komma's te verwijderen -->
+  <xsl:template name="removeCommas">
+    <xsl:param name="inputString" />
+    <xsl:value-of select="translate($inputString, ',', '')" />
+  </xsl:template>
+
+  <xsl:template name="templ_prop_APA_DateAccessed_DMY">
+
+    <!-- SZ APANL 20231130 Hier moet de komma tussen de maand en het jaar eruit. -->
+
     <xsl:param name="LCID" />
     <xsl:variable name="_LCID">
       <xsl:call-template name="localLCID">
         <xsl:with-param name="LCID" select="$LCID"/>
       </xsl:call-template>
     </xsl:variable>
-    <xsl:value-of select="/*/b:Locals/b:Local[@LCID=$_LCID]/b:APA/b:DateAccessed/b:DMY"/>
+    
+    <!--  
+          SZ APANL 20231130 We geven de datumstring niet meteen terug, maar slaan hem op in een variabele DMY.
+          Hier halen we de komma uit met de removeCommas template.
+
+          <xsl:value-of select="/*/b:Locals/b:Local[@LCID=$_LCID]/b:APA/b:DateAccessed/b:DMY"/>
+    -->
+
+    <xsl:variable name="DMY" select="/*/b:Locals/b:Local[@LCID=$_LCID]/b:APA/b:DateAccessed/b:DMY"/>
+    
+    <xsl:call-template name="removeCommas">
+      <xsl:with-param name="inputString" select="$DMY" />
+    </xsl:call-template>
+
   </xsl:template>
 
   
@@ -2102,27 +2163,6 @@
     <xsl:value-of select="/*/b:Locals/b:Local[@LCID=$_LCID]/b:APA/b:DateCourt/b:DY"/>
   </xsl:template>
 
-  <!-- Template for formatting a string as a functional hyperlink -->
-  <xsl:template name="formatHyperlink">
-    <xsl:param name="url"/>
-    <a href="{$url}" target="_blank">
-      <xsl:value-of select="$url"/>
-    </a>
-  </xsl:template>
-
-  <xsl:template name="removeCharsFromEnd">
-    <xsl:param name="mainString" />
-    <xsl:param name="charsToRemove" />
-    <!-- Calculate the length of the main string -->
-    <xsl:variable name="mainStringLength" select="string-length($mainString)" />
-    <!-- Calculate the length of the characters to remove -->
-    <xsl:variable name="charsToRemoveLength" select="string-length($charsToRemove)" />
-    <!-- Check if the main string is longer than the characters to remove -->
-    <xsl:if test="$mainStringLength > $charsToRemoveLength">
-        <!-- Remove characters from the end of the main string -->
-        <xsl:value-of select="substring($mainString, 1, $mainStringLength - $charsToRemoveLength)" />
-    </xsl:if>
-  </xsl:template>
 
   <xsl:template match="/">
 
@@ -2133,11 +2173,11 @@
       </xsl:when>
 
       <xsl:when test="b:OfficeStyleKey">
-        <xsl:text>APA</xsl:text>
+        <xsl:text>APA7</xsl:text>
       </xsl:when>
 
        <xsl:when test="b:XslVersion">
-	      <xsl:text>7</xsl:text>
+	<xsl:text>7</xsl:text>
       </xsl:when>
 
       <xsl:when test="b:StyleNameLocalized">
@@ -2173,7 +2213,7 @@
             <xsl:text>APA</xsl:text>
           </xsl:when>
           <xsl:when test="b:StyleNameLocalized/b:Lcid='1043'">
-            <xsl:text>APA</xsl:text>
+            <xsl:text>APA7</xsl:text>
           </xsl:when>
           <xsl:when test="b:StyleNameLocalized/b:Lcid='1031'">
             <xsl:text>APA</xsl:text>
@@ -2278,6 +2318,9 @@
       </xsl:when>
 
       <xsl:when test="b:GetImportantFields">
+
+        <!-- SZ APANL 20240110 Aanpassing aan standaard getoonde invoervelden. -->
+
         <b:ImportantFields>
           <xsl:choose>
             <xsl:when test="b:GetImportantFields/b:SourceType='Book'">
@@ -2294,7 +2337,25 @@
                 <xsl:text>b:Publisher</xsl:text>
               </b:ImportantField>
               <b:ImportantField>
+                <xsl:text>b:Edition</xsl:text>
+              </b:ImportantField>
+
+              <!-- SZ APANL 20240228 verwijderd n.a.v. opmerking Arjan Dolaar
+              <b:ImportantField>
+                <xsl:text>b:YearAccessed</xsl:text>
+              </b:ImportantField>
+              <b:ImportantField>
+                <xsl:text>b:MonthAccessed</xsl:text>
+              </b:ImportantField>
+              <b:ImportantField>
+                <xsl:text>b:DayAccessed</xsl:text>
+              </b:ImportantField>
+              -->
+              <b:ImportantField>
                 <xsl:text>b:DOI</xsl:text>
+              </b:ImportantField>
+              <b:ImportantField>
+                <xsl:text>b:URL</xsl:text>
               </b:ImportantField>
             </xsl:when>
 
@@ -2322,6 +2383,9 @@
               </b:ImportantField>
               <b:ImportantField>
                 <xsl:text>b:Publisher</xsl:text>
+              </b:ImportantField>
+              <b:ImportantField>
+                <xsl:text>b:DOI</xsl:text>
               </b:ImportantField>
             </xsl:when>
 
@@ -2379,6 +2443,21 @@
               </b:ImportantField>
             <b:ImportantField>
                 <xsl:text>b:DOI</xsl:text>
+              </b:ImportantField>
+              <b:ImportantField>
+                <xsl:text>b:Volume</xsl:text>
+              </b:ImportantField>
+              <b:ImportantField>
+                <xsl:text>b:Issue</xsl:text>
+              </b:ImportantField>
+              <b:ImportantField>
+                <xsl:text>b:YearAccessed</xsl:text>
+              </b:ImportantField>
+              <b:ImportantField>
+                <xsl:text>b:MonthAccessed</xsl:text>
+              </b:ImportantField>
+              <b:ImportantField>
+                <xsl:text>b:DayAccessed</xsl:text>
               </b:ImportantField>
             </xsl:when>
 
@@ -2524,12 +2603,21 @@
               <b:ImportantField>
                 <xsl:text>b:Year</xsl:text>
               </b:ImportantField>
+              
+               <b:ImportantField>
+                <xsl:text>b:DOI</xsl:text>
+              </b:ImportantField>
+
               <b:ImportantField>
-                <xsl:text>b:Month</xsl:text>
+                <xsl:text>b:YearAccessed</xsl:text>
               </b:ImportantField>
               <b:ImportantField>
-                <xsl:text>b:Day</xsl:text>
+                <xsl:text>b:MonthAccessed</xsl:text>
               </b:ImportantField>
+              <b:ImportantField>
+                <xsl:text>b:DayAccessed</xsl:text>
+              </b:ImportantField>
+              
               <b:ImportantField>
                 <xsl:text>b:URL</xsl:text>
               </b:ImportantField>
@@ -2557,6 +2645,17 @@
               <b:ImportantField>
                 <xsl:text>b:URL</xsl:text>
               </b:ImportantField>
+
+              <b:ImportantField>
+                <xsl:text>b:YearAccessed</xsl:text>
+              </b:ImportantField>
+              <b:ImportantField>
+                <xsl:text>b:MonthAccessed</xsl:text>
+              </b:ImportantField>
+              <b:ImportantField>
+                <xsl:text>b:DayAccessed</xsl:text>
+              </b:ImportantField>
+
             </xsl:when>
 
             <xsl:when test="b:GetImportantFields/b:SourceType='Film'">
@@ -4394,9 +4493,23 @@
                           </xsl:if>
 
                           <xsl:if test="string-length($i_titleEditionVolumeDot)>0">
+
+                            <!-- SZ APANL 20240228 Als er vertalers zijn, dan geen punt achter de titel tonen.
+
+                            <xsl:variable name="modified_title">
+                              <xsl:value-of select="substring($i_titleEditionVolumeDot, 1, string-length($i_titleEditionVolumeDot) - 1)" />
+                            </xsl:variable>
+
                             <xsl:call-template name="templ_prop_Space"/>
+                            <xsl:apply-templates select="msxsl:node-set($modified_title)" mode="outputHtml"/>
+                          </xsl:if>
+
+                          -->
+
+                          <xsl:call-template name="templ_prop_Space"/>
                             <xsl:apply-templates select="msxsl:node-set($i_titleEditionVolumeDot)" mode="outputHtml"/>
                           </xsl:if>
+
 
                           <xsl:if test="string-length($theEditorAndTranslatorDot)>0">
                             <xsl:call-template name="templ_prop_Space"/>
@@ -5621,19 +5734,11 @@
 
                 <xsl:choose>
                   <xsl:when test="string-length($doi)>0">
-                      <xsl:call-template name="formatHyperlink">
-                        <xsl:with-param name="url" select="concat($doiPrefix, $doi)"/>
-                      </xsl:call-template>
+                    <xsl:value-of select="$doiPrefix"/>
+                    <xsl:value-of select="$doi"/>
                   </xsl:when>
-                  <xsl:when test="string-length($tempRDAFU) > 0">
-                    <!--<xsl:value-of select="$tempRDAFU"/>-->
-                    <xsl:call-template name="removeCharsFromEnd">
-                        <xsl:with-param name="mainString" select="$tempRDAFU" />
-                        <xsl:with-param name="charsToRemove" select="b:URL" />
-                    </xsl:call-template>
-                    <xsl:call-template name="formatHyperlink">
-                      <xsl:with-param name="url" select="b:URL"/>
-                    </xsl:call-template>
+                  <xsl:when test="string-length($tempRDAFU)>0">
+                    <xsl:value-of select="$tempRDAFU"/>
                   </xsl:when>
                 </xsl:choose>
               </xsl:element>
@@ -6737,8 +6842,15 @@
       </xsl:when>
       <xsl:otherwise>
         <xsl:call-template name="formatDateCorePrivate">
+          
+          <!--SZ APANL 20231130 Lelijke hack :-\ om de datum bij een geraadpleegde website goed te krijgen:
+
           <xsl:with-param name="day" select="$day"/>
-          <xsl:with-param name="month" select="$month"/>
+          <xsl:with-param name="month" select="$month"/>-->
+          
+          <xsl:with-param name="day" select="$month"/>
+          <xsl:with-param name="month" select="$day"/>
+
           <xsl:with-param name="year" select="$year"/>
 
           <xsl:with-param name="DMY" select="$DMY"/>
@@ -7115,6 +7227,14 @@
 
     <xsl:variable name="internetSiteTitleAndURL">
 
+      <!-- SZ APANL 20231130 
+
+      Deze variabele wordt gebruikt bij verwijzingen naar websites, maar in het NL
+      komt de combinatie "<websitetitel>. <url>" niet voor. Omdat ik nog niet helemaal
+      kan doorzien wat hieronder gebeurt heb ik nu het gedeelte ". <url>" er maar af gehaald.
+
+      -->
+
       <xsl:if test="string-length(b:InternetSiteTitle)>0">
       	<xsl:if test="string-length(b:URL)>0">
 	      <xsl:value-of select="b:InternetSiteTitle"/>
@@ -7127,12 +7247,11 @@
       </xsl:if>
 
       <xsl:if test="string-length(b:InternetSiteTitle)>0 and string-length(b:URL)>0">
-        <xsl:call-template name="templ_prop_Dot"/>
-        <xsl:call-template name="templ_prop_Space"/>
+        <!-- SZ APANL 20231130 <xsl:call-template name="templ_prop_EnumSeparator"/>-->
       </xsl:if>
-    
+
       <xsl:if test="string-length(b:URL)>0">
-        <xsl:value-of select="b:URL"/>
+        <!-- SZ APANL 20231130 <xsl:value-of select="b:URL"/>-->
       </xsl:if>
     </xsl:variable>
 
@@ -7344,7 +7463,9 @@
         </xsl:variable>
         <xsl:choose>
           <xsl:when test="$noCommaBeforeAnd != 'yes'">
-            <xsl:call-template name="templ_prop_AuthorsSeparator"/>
+            <!-- SZ APANL 20240905 Hier wordt de evt. komma voor de ampersand geregeld. Onderstaande regel eruit gooien om deze te verwijderen. -->
+              <xsl:call-template name="templ_prop_AuthorsSeparator"/>
+            <xsl:call-template name="templ_prop_Space"/>
           </xsl:when>
           <xsl:otherwise>
             <xsl:call-template name="templ_prop_Space"/>
