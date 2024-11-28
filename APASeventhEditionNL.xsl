@@ -485,7 +485,8 @@
       - FIXME bij referenties zonder raadpleegdatum wordt nu de URL niet meer getoond.
     -->
 
-    <xsl:value-of select="concat('%2. Geraadpleegd op %1, van ', b:URL)"/>
+      <!--<xsl:value-of select="concat('%2. Geraadpleegd op %1, van ', b:URL)"/>-->
+      <xsl:value-of select="concat('Geraadpleegd op %1, van ', b:URL)"/>
 
   </xsl:template>
 
@@ -509,7 +510,7 @@
     
     <xsl:choose>
       <xsl:when test="string-length(b:URL)>0">
-        <xsl:value-of select="concat('Geraadpleegd op %1, van ', b:URL)"/>
+          <xsl:value-of select="concat('Geraadpleegd op %1, van ', b:URL)"/>
       </xsl:when>
       <xsl:otherwise>
         <xsl:text>Geraadpleegd op %1.</xsl:text>
@@ -7257,22 +7258,27 @@
       -->
 
       <xsl:if test="string-length(b:InternetSiteTitle)>0">
-      	<xsl:if test="string-length(b:URL)>0">
-	      <xsl:value-of select="b:InternetSiteTitle"/>
-	    </xsl:if>
-      	<xsl:if test="string-length(b:URL)=0">
-          <xsl:call-template name="appendField_Dot">
+      	 
+         <xsl:if test="string-length(b:URL)>0">
+	         <xsl:value-of select="b:InternetSiteTitle"/>
+	       </xsl:if>
+      	
+          <xsl:if test="string-length(b:URL)=0">
+            <xsl:call-template name="appendField_Dot">
             <xsl:with-param name="field" select="b:InternetSiteTitle"/>
           </xsl:call-template>
-	    </xsl:if>
+	       </xsl:if>
+
       </xsl:if>
 
+      <!-- SZ APANL 20241128 . teruggezet om verwijzingen naar website zonder raadpleegdatum toch een url te geven. -->
       <xsl:if test="string-length(b:InternetSiteTitle)>0 and string-length(b:URL)>0">
-        <!-- SZ APANL 20231130 <xsl:call-template name="templ_prop_EnumSeparator"/>-->
+        <xsl:text>. </xsl:text>
       </xsl:if>
 
+      <!-- SZ APANL 20241128 URL teruggezet om verwijzingen naar website zonder raadpleegdatum toch een url te geven. -->
       <xsl:if test="string-length(b:URL)>0">
-        <!-- SZ APANL 20231130 <xsl:value-of select="b:URL"/>-->
+        <xsl:value-of select="b:URL"/>
       </xsl:if>
     </xsl:variable>
 
@@ -7299,7 +7305,8 @@
                   <xsl:value-of select="$dac"/>
                 </t:param>
                 <t:param>
-                  <xsl:value-of select="$internetSiteTitleAndURL"/>
+                  <!-- SZ APA7NL 20241128 AHA-momentje -->
+                  <!--<xsl:value-of select="$internetSiteTitleAndURL"/>-->
                 </t:param>
               </t:params>
             </xsl:with-param>
