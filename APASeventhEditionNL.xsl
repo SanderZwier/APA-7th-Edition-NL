@@ -452,9 +452,7 @@
         Toevoeging "ed." weglaten bij de vermelding van de druk.
         <xsl:value-of select="/*/b:Locals/b:Local[@LCID=$_LCID]/b:Strings/b:EditionShortUnCap"/>
       -->
-  
       <xsl:value-of select="b:Edition" />
-    
   </xsl:template>
 
   
@@ -2119,7 +2117,6 @@
     </xsl:variable>
     <xsl:value-of select="/*/b:Locals/b:Local[@LCID=$_LCID]/b:APA/b:DateAccessed/b:DM"/>
   </xsl:template>
-
   
   <xsl:template name="templ_prop_APA_DateAccessed_MY" >
     <xsl:param name="LCID" />
@@ -7306,8 +7303,8 @@
                   <xsl:value-of select="$dac"/>
                 </t:param>
                 <t:param>
-                  <!-- SZ APA7NL 20241128 AHA-momentje -->
-                  <!--<xsl:value-of select="$internetSiteTitleAndURL"/>-->
+                  <!-- SZ APA7NL 20241128 Hiermee verwijnt de dubbeling van de URL en wordt deze alleen nog in het "geraadpleegd op" gedeelte getoond. -->
+                  <!-- <xsl:value-of select="$internetSiteTitleAndURL"/>--> 
                 </t:param>
               </t:params>
             </xsl:with-param>
@@ -7402,8 +7399,6 @@
       </xsl:call-template>
     </xsl:if>
   </xsl:template>
-
-
 
   <xsl:template name="formatNameOneItem">
     <xsl:param name="format"/>
