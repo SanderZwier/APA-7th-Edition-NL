@@ -18,7 +18,8 @@
 	HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, 
 	OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-	Version 1.0.1 - Fix to display URL for a website reference, even if retrieval date is missing. Useful for GenAI references.
+	Version 1.0.2 - Fix to correctly display website title for "Website" and "Document van website" references.
+  Version 1.0.1 - Fix to display URL for a website reference, even if retrieval date is missing. Useful for GenAI references.
 	Version 1.0.0 - Initial release
 -->
 
@@ -5151,6 +5152,14 @@
                             </xsl:call-template>
                           </xsl:if>
 
+                          <!-- SZ APANL 20250424 Add the InternetSiteTitle here -->
+                          <xsl:if test="string-length(b:InternetSiteTitle)>0">
+                            <xsl:call-template name="templ_prop_Space"/>
+                            <xsl:value-of select="b:InternetSiteTitle"/>
+                            <xsl:call-template name="templ_prop_Dot"/>
+                          </xsl:if>
+
+
                           <xsl:if test="string-length($theEditorAndTranslatorDot)>0">
                             <xsl:call-template name="templ_prop_Space"/>
                             <xsl:value-of select="$theEditorAndTranslatorDot"/>
@@ -5165,6 +5174,13 @@
                               </xsl:with-param>
                             </xsl:call-template>
                           </xsl:if>
+
+                          <!-- SZ APANL 20250424 Add the InternetSiteTitle here -->
+                        <xsl:if test="string-length(b:InternetSiteTitle)>0">
+                          <xsl:call-template name="templ_prop_Space"/>
+                          <xsl:value-of select="b:InternetSiteTitle"/>
+                          <xsl:call-template name="templ_prop_Dot"/>
+                        </xsl:if>
 
                           <xsl:if test="string-length($enclosedDateDot)>0">
                             <xsl:if test="string-length($titleDot)>0">
@@ -5200,6 +5216,13 @@
                             <xsl:apply-templates select="msxsl:node-set($tempTV)" mode="outputHtml"/>
                           </xsl:if>
 
+                           <!-- SZ APANL 20250424 Add the InternetSiteTitle here -->
+                          <xsl:if test="string-length(b:InternetSiteTitle)>0">
+                            <xsl:call-template name="templ_prop_Space"/>
+                            <xsl:value-of select="b:InternetSiteTitle"/>
+                            <xsl:call-template name="templ_prop_Dot"/>
+                          </xsl:if>
+
                           <xsl:if test="string-length($theInternetSiteEditorAndProducerDot)>0">
                             <xsl:call-template name="templ_prop_Space"/>
                             <xsl:value-of select="$theInternetSiteEditorAndProducerDot"/>
@@ -5209,6 +5232,13 @@
                         <xsl:otherwise>
                           <xsl:if test="string-length($tempTV)>0">
                             <xsl:apply-templates select="msxsl:node-set($tempTV)" mode="outputHtml"/>
+                          </xsl:if>
+
+                           <!-- SZ APANL 20250424 Add the InternetSiteTitle here -->
+                          <xsl:if test="string-length(b:InternetSiteTitle)>0">
+                            <xsl:call-template name="templ_prop_Space"/>
+                            <xsl:value-of select="b:InternetSiteTitle"/>
+                            <xsl:call-template name="templ_prop_Dot"/>
                           </xsl:if>
 
                           <xsl:if test="string-length($enclosedDateDot)>0">
@@ -7247,15 +7277,17 @@
 
     <xsl:variable name="internetSiteTitleAndURL">
 
-      <!-- SZ APANL 20231130 
+      <!-- 
+
+      SZ APANL 20250424 The fix below introduced too many bugs.
+
+      SZ APANL 20231130 
 
       Deze variabele wordt gebruikt bij verwijzingen naar websites, maar in het NL
       komt de combinatie "<websitetitel>. <url>" niet voor. Omdat ik nog niet helemaal
       kan doorzien wat hieronder gebeurt heb ik nu het gedeelte ". <url>" er maar af gehaald.
 
-      -->
-
-      <xsl:if test="string-length(b:InternetSiteTitle)>0">
+      < xsl:if test="string-length(b:InternetSiteTitle)>0">
       	 
          <xsl:if test="string-length(b:URL)>0">
 	         <xsl:value-of select="b:InternetSiteTitle"/>
@@ -7269,12 +7301,14 @@
 
       </xsl:if>
 
-      <!-- SZ APANL 20241128 . teruggezet om verwijzingen naar website zonder raadpleegdatum toch een url te geven. -->
+      SZ APANL 20241128 . teruggezet om verwijzingen naar website zonder raadpleegdatum toch een url te geven. 
       <xsl:if test="string-length(b:InternetSiteTitle)>0 and string-length(b:URL)>0">
         <xsl:text>. </xsl:text>
       </xsl:if>
+      -->
 
       <!-- SZ APANL 20241128 URL teruggezet om verwijzingen naar website zonder raadpleegdatum toch een url te geven. -->
+
       <xsl:if test="string-length(b:URL)>0">
         <xsl:value-of select="b:URL"/>
       </xsl:if>
